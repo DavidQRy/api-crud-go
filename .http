@@ -1,0 +1,30 @@
+### GET gooks
+GET http://localhost:8000/books
+Content-Type: application/json
+
+### POST create book
+POST http://localhost:8000/books
+Content-Type: application/json
+
+{
+  "title": "The Go Programming Language",
+  "author": "Alan Donovan"
+}
+
+
+### GET book by ID
+GET http://localhost:8000/book/1
+Content-Type: application/json
+
+### PUT update book
+PUT http://localhost:8000/book/1
+Content-Type: application/json
+
+{
+  "title": "Updated Book Title",
+  "author": "Updated Author Name"
+}
+
+### DELETE book
+DELETE http://localhost:8000/book/2
+Content-Type: application/json

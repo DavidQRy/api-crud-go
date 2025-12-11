@@ -5,6 +5,8 @@ import (
 	"api-crud-go/internal/service"
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type BookHandler struct {
@@ -46,6 +48,60 @@ func (h *BookHandler) HandleBooks(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		http.Error(w, "Method not Available", http.StatusMethodNotAllowed)
+	}
+
+}
+
+func (h *BookHandler) HandleBookByID(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/book/")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		{
+			book, err := h.service.GetBookById(id)
+			if err != nil {
+				http.Error(w, "Not Found", http.StatusNotFound)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(book)
+		}
+	case http.MethodPut:
+		{
+			var book model.Book
+			if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+				http.Error(w, "input invalid", http.StatusBadRequest)
+			}
+			updated, err := h.service.UpdateBook(id, book)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(updated)
+		}
+	case http.MethodDelete:
+		{
+			err := h.service.DeleteBook(id)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.WriteHeader(http.StatusAccepted)
+		}
+	default:
+		{
+			http.Error(w, "Method invalid", http.StatusBadRequest)
+		}
 	}
 
 }
